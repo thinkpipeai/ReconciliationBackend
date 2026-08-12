@@ -57,3 +57,31 @@ React component → reconcileApi.js → @supabase/supabase-js → Supabase Postg
     Deleted `src/lib/supabase.js` (retained until Day 8 for rollback purposes)
     `src/lib/auth.js` remains unchanged; continues to use `localStorage` for sessions
     `src/reconcile/**/*.jsx` remains unchanged; UI and business logic remain untouched
+
+## 4. REST-API-Spezifikation
+    4.1 Übersicht über die Schnittstellen
+        login | POST | /api/auth/login | body: { „username“, „password“ }
+        checkEmployeesAccessible | GET | /api/health/employees | Gibt zurück, ob Mitarbeiterdaten vorhanden sind
+		fetchEmployees | GET | /api/employees | nur role=employee
+        createEmployee | POST | /api/employees | Mitarbeiter anlegen
+        deleteEmployee | DELETE | /api/employees/{id} | Mitarbeiter löschen
+        fetchTodayRecords | GET | /api/records/today | enthält die Verknüpfung employees.name
+		fetchEmployeeTodayRecords | GET | /api/records/today?employeeId={id} | Heutige Datensätze des Mitarbeiters
+        createRecord | POST | /api/records | Neuen Leistungsdatensatz anlegen
+        fetchTodaySummary | GET | /api/summary/today | Aggregation durch das Backend
+        fetchSettlementForToday | GET | /api/settlements/today | Tagesabrechnung
+		fetchAllSettlements | GET | /api/settlements | Liste der historischen Abrechnungen
+        generateSettlement | POST | /api/settlements/generate | Abrechnungslogik von JS nach Java verlagert
+        Zusätzlich: GET /api/health → { „status“: „ok“ }
+    4.2 Konventionen zur Feldbenennung
+		Backend-Java-DTOs werden in camelCase geschrieben, die JSON-Serialisierung erfolgt in snake_case: Jackson global PropertyNamingStrategies.SNAKE_CASE
+        Vom Frontend verwendete snake_case-Felder:
+    4.3 Enumerationsbeschränkungen (entsprechend dem Schema)
+        role (admin, employee)
+        service (Massage, Cupping, Acupuncture)
+		payment (Cash, Check, Card)
+    4.4 Authentifizierungskonventionen (Phase 1)
+        Anmeldung: POST /api/auth/login, bei Erfolg wird ein Employee-Objekt zurückgegeben (ohne Passwort)
+        Sitzung: Das Frontend nutzt weiterhin localStorage (auth.js bleibt unverändert)
+        Passwortspeicherung: Backend BCrypt
+        Schutz der Verwaltungsschnittstellen: Optionaler Request-Header X-User-Role: admin
