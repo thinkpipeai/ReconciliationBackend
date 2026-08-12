@@ -33,20 +33,6 @@ React 组件 → reconcileApi.js → @supabase/supabase-js → Supabase PostgRES
 结算逻辑 `generateSettlement()` 目前在前端 JavaScript 中执行。
 ---
 ## 2. 目标架构
-```mermaid
-flowchart LR
-  subgraph frontend [Frontend_GitHubPages]
-    UI[React_UI_不变]
-    ApiLayer[reconcileApi.js_改调用REST]
-  end
-  subgraph backend [Backend_云服务器]
-    SB[Spring_Boot]
-    MySQL[(MySQL)]
-  end
-  UI --> ApiLayer
-  ApiLayer -->|"HTTPS /api/*"| SB
-  SB --> MySQL
-
 2.1 Data Flow After the Refactoring
     React component (unchanged) → reconcileApi.js (modified) → fetch REST → Spring Boot → MySQL
 
