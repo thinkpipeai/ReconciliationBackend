@@ -58,30 +58,30 @@ React component → reconcileApi.js → @supabase/supabase-js → Supabase Postg
     `src/lib/auth.js` remains unchanged; continues to use `localStorage` for sessions
     `src/reconcile/**/*.jsx` remains unchanged; UI and business logic remain untouched
 
-## 4. REST-API-Spezifikation
-    4.1 Übersicht über die Schnittstellen
-        login | POST | /api/auth/login | body: { „username“, „password“ }
-        checkEmployeesAccessible | GET | /api/health/employees | Gibt zurück, ob Mitarbeiterdaten vorhanden sind
-		fetchEmployees | GET | /api/employees | nur role=employee
-        createEmployee | POST | /api/employees | Mitarbeiter anlegen
-        deleteEmployee | DELETE | /api/employees/{id} | Mitarbeiter löschen
-        fetchTodayRecords | GET | /api/records/today | enthält die Verknüpfung employees.name
-		fetchEmployeeTodayRecords | GET | /api/records/today?employeeId={id} | Heutige Datensätze des Mitarbeiters
-        createRecord | POST | /api/records | Neuen Leistungsdatensatz anlegen
-        fetchTodaySummary | GET | /api/summary/today | Aggregation durch das Backend
-        fetchSettlementForToday | GET | /api/settlements/today | Tagesabrechnung
-		fetchAllSettlements | GET | /api/settlements | Liste der historischen Abrechnungen
-        generateSettlement | POST | /api/settlements/generate | Abrechnungslogik von JS nach Java verlagert
-        Zusätzlich: GET /api/health → { „status“: „ok“ }
-    4.2 Konventionen zur Feldbenennung
-		Backend-Java-DTOs werden in camelCase geschrieben, die JSON-Serialisierung erfolgt in snake_case: Jackson global PropertyNamingStrategies.SNAKE_CASE
-        Vom Frontend verwendete snake_case-Felder:
-    4.3 Enumerationsbeschränkungen (entsprechend dem Schema)
+## 4. REST API Contract
+    4.1 API Overview
+        login | POST | /api/auth/login | body: { “username”, “password” }
+        checkEmployeesAccessible | GET | /api/health/employees | Returns whether employee data is available
+		fetchEmployees | GET | /api/employees | role=employee only
+        createEmployee | POST | /api/employees | Create an employee
+        deleteEmployee | DELETE | /api/employees/{id} | Delete an employee
+        fetchTodayRecords | GET | /api/records/today | Includes the employees.name association
+		fetchEmployeeTodayRecords | GET | /api/records/today?employeeId={id} | Today’s records for a specific employee
+        createRecord | POST | /api/records | Add a new service record
+        fetchTodaySummary | GET | /api/summary/today | Backend aggregation
+        fetchSettlementForToday | GET | /api/settlements/today | Today’s settlement
+		fetchAllSettlements | GET | /api/settlements | List of historical settlements
+        generateSettlement | POST | /api/settlements/generate | Settlement logic migrated from JS to Java
+        Additional: GET /api/health → { “status”: “ok” }
+    4.2 Field Naming Conventions
+		Backend Java DTOs are written in camelCase; JSON serialization uses snake_case: Jackson’s global `PropertyNamingStrategies.SNAKE_CASE`
+        Snake_case fields used by the frontend:
+    4.3 Enum Constraints (Consistent with schema)
         role (admin, employee)
         service (Massage, Cupping, Acupuncture)
 		payment (Cash, Check, Card)
-    4.4 Authentifizierungskonventionen (Phase 1)
-        Anmeldung: POST /api/auth/login, bei Erfolg wird ein Employee-Objekt zurückgegeben (ohne Passwort)
-        Sitzung: Das Frontend nutzt weiterhin localStorage (auth.js bleibt unverändert)
-        Passwortspeicherung: Backend BCrypt
-        Schutz der Verwaltungsschnittstellen: Optionaler Request-Header X-User-Role: admin
+    4.4 Authentication Conventions (Phase 1)
+        Login: POST /api/auth/login; upon success, returns an Employee object (excluding the password)
+        Session: Frontend continues to use localStorage (auth.js remains unchanged)
+        Password Storage: Backend uses BCrypt
+        Administrative API Protection: Optional request header X-User-Role: admin
