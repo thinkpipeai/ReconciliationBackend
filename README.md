@@ -46,3 +46,29 @@ flowchart LR
   UI --> ApiLayer
   ApiLayer -->|"HTTPS /api/*"| SB
   SB --> MySQL
+
+2.1 Data Flow After the Refactoring
+    React component (unchanged) → reconcileApi.js (modified) → fetch REST → Spring Boot → MySQL
+
+2.2 Deployment Plan
+    Component            Deployment Location            Notes
+    Frontend SPA        GitHub Pages        Domain thinkpipeai.tech, HTTPS
+    Backend API        Cloud Server (VM)        Nginx reverse proxy; subdomain api.thinkpipeai.tech recommended
+    Database            Cloud Server MySQL 8    Access via localhost only; not exposed to the public internet
+
+2.3 Key Constraints
+    1. GitHub Pages uses HTTPS; the backend API must also use HTTPS (to avoid mixed content)
+    2. Frontend CORS must allow requests from https://thinkpipeai.tech and http://localhost:5173
+    3. Data Migration: Only admin seed data is required; do not export historical data from Supabase
+
+3. Scope of Frontend Changes
+    No changes to any .jsx components under `src/reconcile/`; only modify data integration and environment configuration.
+    Rewrite `src/lib/reconcileApi.js`: Replace Supabase calls with `fetch` requests to the REST API; keep the export function signatures unchanged
+    Add `src/lib/httpClient.js` to standardize `baseURL`, JSON, and error handling
+	Modify `.env.example`: Replace `VITE_SUPABASE_*` with `VITE_API_BASE_URL`
+    Modify `vite.config.js`: Change the dev proxy from `/api` to `http://localhost:8080`
+    Modify `.github/workflows/deploy.yml`: Inject `VITE_API_BASE_URL` into CI and remove Supabase secrets
+	Modified `package.json`: Removed `@supabase/supabase-js`
+    Deleted `src/lib/supabase.js` (retained until Day 8 for rollback purposes)
+    `src/lib/auth.js` remains unchanged; continues to use `localStorage` for sessions
+    `src/reconcile/**/*.jsx` remains unchanged; UI and business logic remain untouched
